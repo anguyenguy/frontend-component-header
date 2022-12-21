@@ -17,6 +17,7 @@ import { CaretIcon } from './Icons';
 class DesktopHeader extends React.Component {
   constructor(props) { // eslint-disable-line no-useless-constructor
     super(props);
+    this.state = {showMenu: false};
   }
 
   renderMainMenu() {
@@ -72,45 +73,44 @@ class DesktopHeader extends React.Component {
     );
   }
 
-  renderUserMenu() {
-    const {
-      userMenu,
-      avatar,
-      username,
-      intl,
-    } = this.props;
-
+  renderUserMenuItems() {
     return (
-      <Menu transitionClassName="menu-dropdown" transitionTimeout={250}>
-        <MenuTrigger
-          tag="button"
-          aria-label={intl.formatMessage(messages['header.label.account.menu.for'], { username })}
-          className="btn btn-outline-primary d-inline-flex align-items-center pl-2 pr-3"
+      <div className="col-auto right-ct"
+        onMouseEnter={() => this.showMenu()}
+        onMouseLeave={() => this.hideMenu()}
         >
-          <Avatar size="1.5em" src={avatar} alt="" className="mr-2" />
-          {username} <CaretIcon role="img" aria-hidden focusable="false" />
-        </MenuTrigger>
-        <MenuContent className="mb-0 dropdown-menu show dropdown-menu-right pin-right shadow py-2">
-          {userMenu.map(({ type, href, content }) => (
-            <a className={`dropdown-${type}`} key={`${type}-${content}`} href={href}>{content}</a>
-          ))}
-        </MenuContent>
-      </Menu>
+        <img className="icon-down" src="http://local.overhang.io:8000/static/indigo/images/profiles/default_50.png" alt="" />
+        <img className="icon-down" src="http://local.overhang.io:8000/static/indigo/images/down.png" alt="" />
+        {
+          this.state.showMenu
+          ?
+          <ul className="show-menu">
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="#">Account</a></li>
+            <li><a href="#">Sign Out</a></li>
+          </ul>
+          :null
+        }
+      </div>
     );
   }
 
   renderLoggedOutItems() {
-    const { loggedOutItems } = this.props;
+    return (
+      <div className="col-auto right-ct">
+        <a href="https://funix.edu.vn/dang-ky-tu-van/" className="btn btn-register">Đăng ký</a>
+        <a href="/login" className="btn btn-login">Đăng nhập</a>
+      </div>
+    );
+  }
 
-    return loggedOutItems.map((item, i, arr) => (
-      <a
-        key={`${item.type}-${item.content}`}
-        className={i < arr.length - 1 ? 'btn mr-2 btn-link' : 'btn mr-2 btn-outline-primary'}
-        href={item.href}
-      >
-        {item.content}
-      </a>
-    ));
+  showMenu(){
+    this.setState({showMenu: true});
+  }
+
+  hideMenu(){
+    this.setState({showMenu: false});
   }
 
   render() {
@@ -121,36 +121,31 @@ class DesktopHeader extends React.Component {
       loggedIn,
       intl,
       appMenu,
+      avatar,
+      username
     } = this.props;
     const logoProps = { src: logo, alt: logoAltText, href: logoDestination };
     const logoClasses = getConfig().AUTHN_MINIMAL_HEADER ? 'mw-100' : null;
 
     return (
-      <header className="site-header-desktop">
-        <a className="nav-skip sr-only sr-only-focusable" href="#main">{intl.formatMessage(messages['header.label.skip.nav'])}</a>
-        <div className={`container-fluid ${logoClasses}`}>
-          <div className="nav-container position-relative d-flex align-items-center">
-            {logoDestination === null ? <Logo className="logo" src={logo} alt={logoAltText} /> : <LinkedLogo className="logo" {...logoProps} />}
-            <nav
-              aria-label={intl.formatMessage(messages['header.label.main.nav'])}
-              className="nav main-nav"
-            >
-              {this.renderMainMenu()}
-            </nav>
-            {appMenu ? (
-              <nav
-                aria-label={intl.formatMessage(messages['header.label.app.nav'])}
-                className="nav app-nav"
-              >
-                {this.renderAppMenu()}
+      <header className="is-login site-header">
+        <div className="container">
+          <div className="container-fluid">
+            <div className="row">
+              <div className="col-auto logo">
+                <a href="/">
+                  <Logo src={logo} alt={logoAltText} />
+                </a>
+              </div>
+
+              <nav className="col-auto menu">
+                <ul className="navigation">
+                    <li className="active"><a href="/">Courses</a></li>
+                    <li><a href="/courses">Discover New</a></li>
+                </ul>
               </nav>
-            ) : null}
-            <nav
-              aria-label={intl.formatMessage(messages['header.label.secondary.nav'])}
-              className="nav secondary-menu-container align-items-center ml-auto"
-            >
-              {loggedIn ? this.renderUserMenu() : this.renderLoggedOutItems()}
-            </nav>
+              {loggedIn ? this.renderUserMenuItems() : this.renderLoggedOutItems()}
+            </div>
           </div>
         </div>
       </header>

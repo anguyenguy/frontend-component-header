@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from '@edx/frontend-platform/i18n';
@@ -17,6 +18,7 @@ import { MenuIcon } from './Icons';
 class MobileHeader extends React.Component {
   constructor(props) { // eslint-disable-line no-useless-constructor
     super(props);
+    this.state = {showMenu: false};
   }
 
   renderMainMenu() {
@@ -57,28 +59,43 @@ class MobileHeader extends React.Component {
   }
 
   renderUserMenuItems() {
-    const { userMenu } = this.props;
-
-    return userMenu.map(({ type, href, content }) => (
-      <li className="nav-item" key={`${type}-${content}`}>
-        <a className="nav-link" href={href}>{content}</a>
-      </li>
-    ));
+    return (
+      <div className="col-auto right-ct"
+        onMouseEnter={() => this.showMenu()}
+        onMouseLeave={() => this.hideMenu()}
+        >
+        <img className="icon-down" src="http://local.overhang.io:8000/static/indigo/images/profiles/default_50.png" alt="" />
+        <img className="icon-down" src="http://local.overhang.io:8000/static/indigo/images/down.png" alt="" />
+        {
+          this.state.showMenu
+          ?
+          <ul className="show-menu">
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="#">Account</a></li>
+            <li><a href="#">Sign Out</a></li>
+          </ul>
+          :null
+        }
+      </div>
+    );
   }
 
   renderLoggedOutItems() {
-    const { loggedOutItems } = this.props;
+    return (
+      <div className="col-auto right-ct">
+        <a href="#" className="btn btn-register">Đăng ký</a>
+        <a href="dang-nhap.html" className="btn btn-login">Đăng nhập</a>
+      </div>
+    );
+  }
 
-    return loggedOutItems.map(({ type, href, content }, i, arr) => (
-      <li className="nav-item px-3 my-2" key={`${type}-${content}`}>
-        <a
-          className={i < arr.length - 1 ? 'btn btn-block btn-outline-primary' : 'btn btn-block btn-primary'}
-          href={href}
-        >
-          {content}
-        </a>
-      </li>
-    ));
+  showMenu(){
+    this.setState({showMenu: true});
+  }
+
+  hideMenu(){
+    this.setState({showMenu: false});
   }
 
   render() {
@@ -87,66 +104,35 @@ class MobileHeader extends React.Component {
       logoAltText,
       logoDestination,
       loggedIn,
-      avatar,
-      username,
-      stickyOnMobile,
       intl,
-      mainMenu,
-      userMenu,
-      loggedOutItems,
+      appMenu,
+      avatar,
+      username
     } = this.props;
     const logoProps = { src: logo, alt: logoAltText, href: logoDestination };
-    const stickyClassName = stickyOnMobile ? 'sticky-top' : '';
-    const logoClasses = getConfig().AUTHN_MINIMAL_HEADER ? 'justify-content-left pl-3' : 'justify-content-center';
+    const logoClasses = getConfig().AUTHN_MINIMAL_HEADER ? 'mw-100' : null;
 
     return (
-      <header
-        aria-label={intl.formatMessage(messages['header.label.main.header'])}
-        className={`site-header-mobile d-flex justify-content-between align-items-center shadow ${stickyClassName}`}
-      >
-        <a className="nav-skip sr-only sr-only-focusable" href="#main">{intl.formatMessage(messages['header.label.skip.nav'])}</a>
-        {mainMenu.length > 0 ? (
-          <div className="w-100 d-flex justify-content-start">
+      <header className="is-login site-header">
+        <div className="container">
+          <div className="container-fluid">
+            <div className="row">
+              <div className="col-auto logo">
+                <a href="/">
+                  <Logo src={logo} alt={logoAltText} />
+                </a>
+              </div>
 
-            <Menu className="position-static">
-              <MenuTrigger
-                tag="button"
-                className="icon-button"
-                aria-label={intl.formatMessage(messages['header.label.main.menu'])}
-                title={intl.formatMessage(messages['header.label.main.menu'])}
-              >
-                <MenuIcon role="img" aria-hidden focusable="false" style={{ width: '1.5rem', height: '1.5rem' }} />
-              </MenuTrigger>
-              <MenuContent
-                tag="nav"
-                aria-label={intl.formatMessage(messages['header.label.main.nav'])}
-                className="nav flex-column pin-left pin-right border-top shadow py-2"
-              >
-                {this.renderMainMenu()}
-              </MenuContent>
-            </Menu>
+              <nav className="col-auto menu">
+                <ul className="navigation">
+                    <li className="active"><a href="/">Courses</a></li>
+                    <li><a href="/courses">Discover New</a></li>
+                </ul>
+              </nav>
+              {loggedIn ? this.renderUserMenuItems() : this.renderLoggedOutItems()}
+            </div>
           </div>
-        ) : null}
-        <div className={`w-100 d-flex ${logoClasses}`}>
-          { logoDestination === null ? <Logo className="logo" src={logo} alt={logoAltText} /> : <LinkedLogo className="logo" {...logoProps} itemType="http://schema.org/Organization" />}
         </div>
-        {userMenu.length > 0 || loggedOutItems.length > 0 ? (
-          <div className="w-100 d-flex justify-content-end align-items-center">
-            <Menu tag="nav" aria-label={intl.formatMessage(messages['header.label.secondary.nav'])} className="position-static">
-              <MenuTrigger
-                tag="button"
-                className="icon-button"
-                aria-label={intl.formatMessage(messages['header.label.account.menu'])}
-                title={intl.formatMessage(messages['header.label.account.menu'])}
-              >
-                <Avatar size="1.5rem" src={avatar} alt={username} />
-              </MenuTrigger>
-              <MenuContent tag="ul" className="nav flex-column pin-left pin-right border-top shadow py-2">
-                {loggedIn ? this.renderUserMenuItems() : this.renderLoggedOutItems()}
-              </MenuContent>
-            </Menu>
-          </div>
-        ) : null}
       </header>
     );
   }
@@ -169,6 +155,7 @@ MobileHeader.propTypes = {
     content: PropTypes.string,
   })),
   logo: PropTypes.string,
+  logoDown: PropTypes.string,
   logoAltText: PropTypes.string,
   logoDestination: PropTypes.string,
   avatar: PropTypes.string,
@@ -185,6 +172,7 @@ MobileHeader.defaultProps = {
   userMenu: [],
   loggedOutItems: [],
   logo: null,
+  logoDown: null,
   logoAltText: null,
   logoDestination: null,
   avatar: null,

@@ -21,6 +21,7 @@ ensureConfig([
   'LOGIN_URL',
   'SITE_NAME',
   'LOGO_URL',
+  'LOGO_DOWN_URL',
   'ORDER_HISTORY_URL',
 ], 'Header component');
 
@@ -90,6 +91,7 @@ const Header = ({ intl }) => {
 
   const props = {
     logo: config.LOGO_URL,
+    logoDown: config.LOGO_DOWN_URL,
     logoAltText: config.SITE_NAME,
     logoDestination: `${config.LMS_BASE_URL}/dashboard`,
     loggedIn: authenticatedUser !== null,
@@ -102,10 +104,10 @@ const Header = ({ intl }) => {
 
   return (
     <>
-      <Responsive maxWidth={768}>
+      <Responsive maxWidth={479}>
         <MobileHeader {...props} />
       </Responsive>
-      <Responsive minWidth={769}>
+      <Responsive minWidth={480}>
         <DesktopHeader {...props} />
       </Responsive>
     </>
